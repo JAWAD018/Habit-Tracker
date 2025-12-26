@@ -217,38 +217,50 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 px-6 bg-gradient-to-br from-indigo-600 to-purple-600 text-white">
-        <div className="container mx-auto max-w-6xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-black mb-4">
-              Built for Success
-            </h2>
-            <p className="text-xl text-indigo-100">
-              Join thousands building better habits every day
-            </p>
-          </div>
-          
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="text-5xl font-black mb-2">10K+</div>
-              <div className="text-indigo-200">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-black mb-2">50K+</div>
-              <div className="text-indigo-200">Habits Tracked</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-black mb-2">1M+</div>
-              <div className="text-indigo-200">Check-ins Completed</div>
-            </div>
-            <div className="text-center">
-              <div className="text-5xl font-black mb-2">95%</div>
-              <div className="text-indigo-200">Success Rate</div>
-            </div>
-          </div>
-        </div>
-      </section>
+
+<section className="py-20 px-6 bg-linear-to-br from-indigo-600 to-purple-600 text-white">
+  <div className="container mx-auto max-w-6xl">
+    <div className="text-center mb-14">
+      <h2 className="text-4xl md:text-5xl font-black mb-4">
+        Designed to Help You Stay Consistent
+      </h2>
+      <p className="text-xl text-indigo-100 max-w-2xl mx-auto">
+        Habit Tracker focuses on clarity, motivation, and long-term progress —
+        without overwhelming you.
+      </p>
+    </div>
+
+    <div className="grid md:grid-cols-3 gap-8">
+      <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
+        <Flame className="w-10 h-10 text-orange-300 mb-4" />
+        <h3 className="text-xl font-bold mb-2">Build Real Streaks</h3>
+        <p className="text-indigo-100 text-sm leading-relaxed">
+          Visual streaks keep you motivated and help you show up every day,
+          even on low-energy days.
+        </p>
+      </div>
+
+      <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
+        <BarChart3 className="w-10 h-10 text-indigo-200 mb-4" />
+        <h3 className="text-xl font-bold mb-2">See Your Progress</h3>
+        <p className="text-indigo-100 text-sm leading-relaxed">
+          Understand patterns, spot missed days, and improve consistency
+          with clear visual insights.
+        </p>
+      </div>
+
+      <div className="bg-white/10 backdrop-blur rounded-2xl p-8 border border-white/20">
+        <Calendar className="w-10 h-10 text-blue-200 mb-4" />
+        <h3 className="text-xl font-bold mb-2">Stay Organized</h3>
+        <p className="text-indigo-100 text-sm leading-relaxed">
+          A clean calendar view helps you plan habits and stay intentional
+          with your daily actions.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       {/* CTA Section */}
       <section className="py-20 px-6">
