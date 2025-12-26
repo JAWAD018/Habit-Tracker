@@ -1,8 +1,6 @@
-import { useState } from "react";
 import StatsCards from "./StatsCards";
 import TaskCard from "./TaskCard";
 import WeeklyProgressChart from "../charts/WeeklyProgressChart";
-import { enableNotifications } from "../../utils/enableNotifications";
 
 /* ---------- Weekly Progress Helper ---------- */
 const getWeeklyProgressFromFirebase = (tasks = []) => {
@@ -57,18 +55,7 @@ const Dashboard = ({
 }) => {
   const weeklyData = getWeeklyProgressFromFirebase(tasks);
 
-  // 🔔 Notification popup state
-  const [showNotifyPrompt, setShowNotifyPrompt] = useState(false);
-
-  // Show notification popup ONCE when user has at least 1 task
-  if (
-    tasks.length > 0 &&
-    !showNotifyPrompt &&
-    !localStorage.getItem("notifPromptShown")
-  ) {
-    setShowNotifyPrompt(true);
-    localStorage.setItem("notifPromptShown", "true");
-  }
+ 
 
   return (
     <div className="space-y-6 sm:space-y-8 relative">
@@ -108,35 +95,6 @@ const Dashboard = ({
           />
         ))}
       </div>
-
-      {/* 🔔 Notification Prompt */}
-      {showNotifyPrompt && (
-        <div className="fixed bottom-4 left-4 right-4 bg-white shadow-xl rounded-xl p-4 z-50 border">
-          <h3 className="font-semibold text-lg">🔔 Daily Reminders</h3>
-          <p className="text-sm text-gray-600">
-            Get notified so you don’t miss your habits.
-          </p>
-
-          <div className="flex gap-3 mt-3">
-            <button
-              onClick={() => {
-                enableNotifications();
-                setShowNotifyPrompt(false);
-              }}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg"
-            >
-              Enable Notifications
-            </button>
-
-            <button
-              onClick={() => setShowNotifyPrompt(false)}
-              className="text-gray-500"
-            >
-              Not now
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
