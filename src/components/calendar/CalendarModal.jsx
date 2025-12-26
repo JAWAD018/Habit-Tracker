@@ -166,7 +166,7 @@ const CalendarModal = ({ task, onClose }) => {
                           text-xs sm:text-sm">
             <Legend color="green" label="Completed" />
             <Legend color="red" label="Missed" />
-            <Legend color="gray" label="No data / Rest" />
+            <Legend color="gray" label="Rest" />
           </div>
         </div>
       </div>

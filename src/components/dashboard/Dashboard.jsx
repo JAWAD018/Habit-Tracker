@@ -1,8 +1,9 @@
 import StatsCards from "./StatsCards";
 import TaskCard from "./TaskCard";
 import WeeklyProgressChart from "../charts/WeeklyProgressChart";
+import { useState } from "react";
 
-/* ---------- Weekly Progress Helper ---------- */
+// Weekly Data
 const getWeeklyProgressFromFirebase = (tasks = []) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -43,7 +44,47 @@ const getWeeklyProgressFromFirebase = (tasks = []) => {
   return result;
 };
 
-/* ---------- Dashboard Component ---------- */
+// Monthly Data
+const getMonthlyProgressFromFirebase = (tasks = []) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const year = today.getFullYear();
+  const month = today.getMonth(); // 0-based
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const result = [];
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    date.setHours(0, 0, 0, 0);
+
+    const dateKey = date.toISOString().split("T")[0];
+
+    let completed = 0;
+    let incompleted = 0;
+
+    tasks.forEach((task) => {
+      const checkin = task.checkins?.[dateKey];
+      if (!checkin) return;
+
+      if (checkin.completed) {
+        completed++;
+      } else if (!checkin.autoMarked) {
+        incompleted++;
+      }
+    });
+
+    result.push({
+      day: day.toString(), 
+      completed,
+      incompleted,
+    });
+  }
+
+  return result;
+};
+
 const Dashboard = ({
   tasks,
   dateKey,
@@ -53,9 +94,12 @@ const Dashboard = ({
   deleteTask,
   setSelectedTask,
 }) => {
-  const weeklyData = getWeeklyProgressFromFirebase(tasks);
+  const [chartView, setChartView] = useState("weekly");
 
- 
+  const chartData =
+    chartView === "weekly"
+      ? getWeeklyProgressFromFirebase(tasks)
+      : getMonthlyProgressFromFirebase(tasks);
 
   return (
     <div className="space-y-6 sm:space-y-8 relative">
@@ -63,17 +107,41 @@ const Dashboard = ({
       <StatsCards tasks={tasks} dateKey={dateKey} today={today} />
 
       {/* 📊 Weekly Chart */}
+      <div className="flex gap-2 mb-3">
+        <button
+          onClick={() => setChartView("weekly")}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+            chartView === "weekly"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          Weekly
+        </button>
+
+        <button
+          onClick={() => setChartView("monthly")}
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+            chartView === "monthly"
+              ? "bg-indigo-600 text-white"
+              : "bg-gray-100 text-gray-700"
+          }`}
+        >
+          Monthly
+        </button>
+      </div>
+
       <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
         <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
-          Weekly Activity
+          {chartView === "weekly" ? "Weekly Activity" : "Monthly Activity"}
         </h3>
 
         <div className="w-full overflow-x-auto">
-          <WeeklyProgressChart data={weeklyData} />
+          <WeeklyProgressChart data={chartData} />
         </div>
       </div>
 
-      {/* 📋 Task Cards */}
+      {/* Task Cards */}
       <div
         className="
           grid grid-cols-1 
@@ -86,7 +154,7 @@ const Dashboard = ({
           <TaskCard
             key={task.id}
             task={task}
-            stats={calculateStats(task)}
+            stats={calculateStats(task, today)}
             dateKey={dateKey}
             today={today}
             handleCheckin={handleCheckin}

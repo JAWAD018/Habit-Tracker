@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Target, User, LogOut, Menu, X } from "lucide-react";
+import { Target, User, LogOut, Menu, X, Trophy } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Navbar = ({ userEmail, onLogout }) => {

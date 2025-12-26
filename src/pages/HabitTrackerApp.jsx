@@ -120,27 +120,59 @@ const HabitTrackerApp = () => {
     return count;
   };
 
-  const calculateStats = (task) => {
-    const checkins = Object.values(task.checkins || {});
-    const completed = checkins.filter(c => c.completed).length;
-    const missed = checkins.filter(c => !c.completed).length;
-    const percentage = task.totalActiveDays
-      ? Math.round((completed / task.totalActiveDays) * 100)
-      : 0;
+const calculateStats = (task, today) => {
+  const checkins = task.checkins || {};
+  const excludedDays = task.excludedDays ?? [];
 
-    let currentStreak = 0;
-    let temp = 0;
-    Object.values(task.checkins || {}).forEach(c => {
-      if (c.completed) {
-        temp++;
-        currentStreak = Math.max(currentStreak, temp);
-      } else {
-        temp = 0;
-      }
-    });
+  const completed = Object.values(checkins).filter(c => c.completed).length;
+  const missed = Object.values(checkins).filter(c => !c.completed).length;
 
-    return { completed, missed, percentage, currentStreak };
-  };
+  const percentage = task.totalActiveDays
+    ? Math.round((completed / task.totalActiveDays) * 100)
+    : 0;
+
+  // 🔥 FIXED CURRENT STREAK
+  let currentStreak = 0;
+
+  const dayNames = [
+    "Sunday","Monday","Tuesday",
+    "Wednesday","Thursday","Friday","Saturday"
+  ];
+
+  // normalize today
+  const cursor = new Date(today);
+  cursor.setHours(0, 0, 0, 0);
+
+  const startDateKey = task.startDate.split("T")[0];
+
+  while (true) {
+    const dateKey = cursor.toISOString().split("T")[0];
+
+    // stop before habit start
+    if (dateKey < startDateKey) break;
+
+    const dayName = dayNames[cursor.getDay()];
+
+    // skip excluded days
+    if (excludedDays.includes(dayName)) {
+      cursor.setDate(cursor.getDate() - 1);
+      continue;
+    }
+
+    const checkin = checkins[dateKey];
+
+    // ❌ break streak
+    if (!checkin || checkin.completed === false) break;
+
+    // ✅ completed
+    currentStreak++;
+
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return { completed, missed, percentage, currentStreak };
+};
+
 
 const isActiveDay = (date, excludedDays) => {
   const days = [
