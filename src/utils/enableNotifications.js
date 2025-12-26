@@ -1,38 +1,33 @@
-// src/utils/enableNotifications.js
 import { getToken } from "firebase/messaging";
-import { messaging } from "../firebase";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { db, auth } from "../firebase";
+import { messaging, db, auth } from "../firebase";
 
 export async function enableNotifications() {
   const permission = await Notification.requestPermission();
-
   if (permission !== "granted") {
-    alert("Notifications blocked");
+    alert("Permission blocked");
     return;
   }
 
   const token = await getToken(messaging, {
-    vapidKey: "BB11QKT5ZEHOL2oUzsMva2Lqnb5mPfw-ZbNcLUSBaySLGYu_Id1833zx58kCcITxKh_7IPbGHhRRj9U5nliQjhQ",
+    vapidKey: "YOUR_VAPID_KEY"
   });
 
-  if (!token) {
-    alert("FCM token not generated");
+  const user = auth.currentUser;
+  if (!user) {
+    alert("User not logged in");
     return;
   }
-
-  const user = auth.currentUser;
-  if (!user) return;
 
   await setDoc(
     doc(db, "users", user.uid),
     {
       fcmToken: token,
       notificationEnabled: true,
-      updatedAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     },
     { merge: true }
   );
 
-  console.log("✅ FCM TOKEN SAVED:", token);
+  alert("FCM token saved correctly ✅");
 }
