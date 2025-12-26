@@ -10,7 +10,7 @@ export async function enableNotifications() {
   }
 
   const token = await getToken(messaging, {
-    vapidKey: "YOUR_VAPID_KEY"
+    vapidKey: "BJYZ1o8RTlsTrbu4-pS_jYgeuld1xa59RUmrEs0U9xmeo6JENbbq0XEMwHuCJlrVHpp85j3gGWu34XH0G9uyf_w"
   });
 
   const user = auth.currentUser;
