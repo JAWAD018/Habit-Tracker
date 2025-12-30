@@ -10,7 +10,7 @@ import { auth, googleProvider } from "../firebase";
 import AuthCard from "../components/Auth/AuthCard";
 
 const Login = () => {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState(undefined); // 🔑 IMPORTANT
   const [loginMode, setLoginMode] = useState("login");
   const [credentials, setCredentials] = useState({
     email: "",
@@ -19,10 +19,20 @@ const Login = () => {
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
+      setCurrentUser(user ?? null);
     });
     return () => unsub();
   }, []);
+
+  // ⛔ DO NOT render anything until Firebase responds
+  if (currentUser === undefined) {
+    return null; // or full-screen loader
+  }
+
+  // ✅ Already logged in → dashboard (NO flicker)
+  if (currentUser) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const handleAuth = async () => {
     try {
@@ -39,7 +49,6 @@ const Login = () => {
           credentials.password
         );
       }
-      setCredentials({ email: "", password: "" });
     } catch (err) {
       alert(err.message);
     }
@@ -52,11 +61,6 @@ const Login = () => {
       alert(err.message);
     }
   };
-
-  // ✅ Already logged in → go to dashboard
-  if (currentUser) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   return (
     <AuthCard

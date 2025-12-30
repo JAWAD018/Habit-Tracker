@@ -1,40 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
+  <!-- Home -->
   <url>
     <loc>https://habit-tracker-threee.vercel.app/</loc>
-    <lastmod>2025-12-26</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <priority>1.0</priority>
+  </url>
+
+  <!-- Core Pages -->
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/about</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://habit-tracker-threee.vercel.app/how-it-works</loc>
-    <lastmod>2025-12-26</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://habit-tracker-threee.vercel.app/faq</loc>
-    <lastmod>2025-12-26</lastmod>
+    <lastmod>2025-12-30</lastmod>
     <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://habit-tracker-threee.vercel.app/support</loc>
-    <lastmod>2025-12-26</lastmod>
-    <priority>0.7</priority>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
   </url>
 
   <url>
     <loc>https://habit-tracker-threee.vercel.app/privacy-policy</loc>
-    <lastmod>2025-12-26</lastmod>
-    <priority>0.6</priority>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.7</priority>
   </url>
 
   <url>
     <loc>https://habit-tracker-threee.vercel.app/terms</loc>
-    <lastmod>2025-12-26</lastmod>
-    <priority>0.6</priority>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Blog Pages -->
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/blog/how-to-build-daily-habits</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/blog/best-habit-tracking-methods</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/blog/habit-tracking-productivity</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/blog/daily-productivity-tips</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://habit-tracker-threee.vercel.app/blog/habit-building-mistakes</loc>
+    <lastmod>2025-12-30</lastmod>
+    <priority>0.8</priority>
   </url>
 
 </urlset>

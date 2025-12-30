@@ -7,6 +7,11 @@ import FAQ from "./pages/FAQ";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import Terms from "./pages/Terms";
 import Support from "./pages/Support";
+import HowToBuildHabits from "./components/blog/how-to-build-daily-habits";
+import BestHabitTrackingMethods from "./components/blog/BestHabitTrackingMethods";
+import HabitTrackingProductivity from "./components/blog/HabitTrackingProductivity";
+import DailyProductivityTips from "./components/blog/DailyProductivityTips";
+import HabitBuildingMistakes from "./components/blog/HabitBuildingMistakes";
 
 function App() {
   return (
@@ -27,6 +32,29 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/support" element={<Support />} />
+
+        {/* Blogs Routes */}
+
+         <Route
+          path="/blog/how-to-build-daily-habits"
+          element={<HowToBuildHabits />}
+        />
+        <Route
+          path="/blog/best-habit-tracking-methods"
+          element={<BestHabitTrackingMethods />}
+        />
+        <Route
+          path="/blog/habit-tracking-productivity"
+          element={<HabitTrackingProductivity />}
+        />
+        <Route
+          path="/blog/daily-productivity-tips"
+          element={<DailyProductivityTips />}
+        />
+        <Route
+          path="/blog/habit-building-mistakes"
+          element={<HabitBuildingMistakes />}
+        />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
