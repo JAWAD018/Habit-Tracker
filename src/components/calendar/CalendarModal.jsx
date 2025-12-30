@@ -17,12 +17,10 @@ const CalendarModal = ({ task, onClose }) => {
     "July","August","September","October","November","December"
   ];
 
-  // Month setup
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayIndex = new Date(year, month, 1).getDay();
   const emptySlots = Array(firstDayIndex).fill(null);
 
-  // Build calendar days
   const days = Array.from({ length: daysInMonth }, (_, i) => {
     const date = new Date(year, month, i + 1);
     date.setHours(0, 0, 0, 0);
@@ -37,7 +35,6 @@ const CalendarModal = ({ task, onClose }) => {
     };
   });
 
-  /* -------- Stats -------- */
   const completed = days.filter(d => d.checkin?.completed).length;
   const missed = days.filter(d => d.checkin && !d.checkin.completed).length;
   const activeDays = days.filter(d => !d.isExcluded).length;
@@ -50,7 +47,7 @@ const CalendarModal = ({ task, onClose }) => {
                     flex items-end sm:items-center justify-center">
 
       {/* Modal */}
-      <div className="bg-white w-full sm:max-w-5xl max-h-[95vh]
+      <div className="bg-white dark:bg-gray-900 w-full sm:max-w-5xl max-h-[95vh]
                       rounded-t-3xl sm:rounded-3xl shadow-2xl
                       flex flex-col overflow-hidden">
 
@@ -98,7 +95,7 @@ const CalendarModal = ({ task, onClose }) => {
               <div
                 key={d}
                 className="text-center text-xs sm:text-sm
-                           font-semibold text-gray-600"
+                           font-semibold text-gray-600 dark:text-gray-400"
               >
                 {d}
               </div>
@@ -112,21 +109,20 @@ const CalendarModal = ({ task, onClose }) => {
             ))}
 
             {days.map((d, i) => {
-              // Neutral default
               let style =
-                "bg-gray-50 border-gray-200 text-gray-500";
+                "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400";
 
               if (d.isExcluded) {
                 style =
-                  "bg-gray-100 border-gray-300 text-gray-400 opacity-60";
+                  "bg-gray-100 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-400 opacity-60";
               }
               else if (d.checkin?.completed) {
                 style =
-                  "bg-green-50 border-green-400 text-green-800";
+                  "bg-green-50 dark:bg-green-900/30 border-green-400 dark:border-green-600 text-green-800 dark:text-green-300";
               }
               else if (d.checkin && !d.checkin.completed) {
                 style =
-                  "bg-red-50 border-red-400 text-red-800";
+                  "bg-red-50 dark:bg-red-900/30 border-red-400 dark:border-red-600 text-red-800 dark:text-red-300";
               }
 
               return (
@@ -143,10 +139,10 @@ const CalendarModal = ({ task, onClose }) => {
 
                   <div>
                     {d.checkin?.completed && (
-                      <CheckCircle className="w-4 h-4 text-green-600" />
+                      <CheckCircle className="w-4 h-4 text-green-600 dark:text-green-400" />
                     )}
                     {d.checkin && !d.checkin.completed && (
-                      <XCircle className="w-4 h-4 text-red-600" />
+                      <XCircle className="w-4 h-4 text-red-600 dark:text-red-400" />
                     )}
                     {d.isExcluded && (
                       <div className="text-[10px] opacity-60">
@@ -161,7 +157,8 @@ const CalendarModal = ({ task, onClose }) => {
         </div>
 
         {/* Legend */}
-        <div className="border-t bg-gray-50 p-3 sm:p-4">
+        <div className="border-t border-gray-200 dark:border-gray-800
+                        bg-gray-50 dark:bg-gray-900 p-3 sm:p-4">
           <div className="flex flex-wrap justify-center gap-3
                           text-xs sm:text-sm">
             <Legend color="green" label="Completed" />
@@ -192,14 +189,14 @@ const Legend = ({ color, label }) => (
   <div className="flex items-center gap-2">
     <div
       className={`w-3 h-3 sm:w-4 sm:h-4 rounded border-2 ${
-        color === "green" && "bg-green-50 border-green-400"
+        color === "green" && "bg-green-50 dark:bg-green-900/30 border-green-400"
       } ${
-        color === "red" && "bg-red-50 border-red-400"
+        color === "red" && "bg-red-50 dark:bg-red-900/30 border-red-400"
       } ${
-        color === "gray" && "bg-gray-100 border-gray-300"
+        color === "gray" && "bg-gray-100 dark:bg-gray-700 border-gray-300"
       }`}
     />
-    <span className="font-medium text-gray-700">
+    <span className="font-medium text-gray-700 dark:text-gray-300">
       {label}
     </span>
   </div>

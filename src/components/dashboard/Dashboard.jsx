@@ -3,7 +3,7 @@ import TaskCard from "./TaskCard";
 import WeeklyProgressChart from "../charts/WeeklyProgressChart";
 import { useState } from "react";
 
-// Weekly Data
+/* ---------------- WEEKLY DATA ---------------- */
 const getWeeklyProgressFromFirebase = (tasks = []) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -15,42 +15,32 @@ const getWeeklyProgressFromFirebase = (tasks = []) => {
     date.setDate(today.getDate() - i);
 
     const dateKey = date.toISOString().split("T")[0];
-
-    const dayLabel = date.toLocaleDateString("en-US", {
-      weekday: "short",
-    });
+    const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" });
 
     let completed = 0;
     let incompleted = 0;
 
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       const checkin = task.checkins?.[dateKey];
       if (!checkin) return;
 
-      if (checkin.completed) {
-        completed++;
-      } else if (!checkin.autoMarked) {
-        incompleted++;
-      }
+      if (checkin.completed) completed++;
+      else if (!checkin.autoMarked) incompleted++;
     });
 
-    result.push({
-      day: dayLabel,
-      completed,
-      incompleted,
-    });
+    result.push({ day: dayLabel, completed, incompleted });
   }
 
   return result;
 };
 
-// Monthly Data
+/* ---------------- MONTHLY DATA ---------------- */
 const getMonthlyProgressFromFirebase = (tasks = []) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const year = today.getFullYear();
-  const month = today.getMonth(); // 0-based
+  const month = today.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
   const result = [];
@@ -64,27 +54,25 @@ const getMonthlyProgressFromFirebase = (tasks = []) => {
     let completed = 0;
     let incompleted = 0;
 
-    tasks.forEach((task) => {
+    tasks.forEach(task => {
       const checkin = task.checkins?.[dateKey];
       if (!checkin) return;
 
-      if (checkin.completed) {
-        completed++;
-      } else if (!checkin.autoMarked) {
-        incompleted++;
-      }
+      if (checkin.completed) completed++;
+      else if (!checkin.autoMarked) incompleted++;
     });
 
     result.push({
-      day: day.toString(), 
+      day: day.toString(),
       completed,
-      incompleted,
+      incompleted
     });
   }
 
   return result;
 };
 
+/* ---------------- DASHBOARD ---------------- */
 const Dashboard = ({
   tasks,
   dateKey,
@@ -92,7 +80,7 @@ const Dashboard = ({
   calculateStats,
   handleCheckin,
   deleteTask,
-  setSelectedTask,
+  setSelectedTask
 }) => {
   const [chartView, setChartView] = useState("weekly");
 
@@ -106,14 +94,14 @@ const Dashboard = ({
       {/* 🔢 Stats */}
       <StatsCards tasks={tasks} dateKey={dateKey} today={today} />
 
-      {/* 📊 Weekly Chart */}
+      {/* 📊 Chart Toggle */}
       <div className="flex gap-2 mb-3">
         <button
           onClick={() => setChartView("weekly")}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
             chartView === "weekly"
               ? "bg-indigo-600 text-white"
-              : "bg-gray-100 text-gray-700"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
           }`}
         >
           Weekly
@@ -121,18 +109,19 @@ const Dashboard = ({
 
         <button
           onClick={() => setChartView("monthly")}
-          className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+          className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
             chartView === "monthly"
               ? "bg-indigo-600 text-white"
-              : "bg-gray-100 text-gray-700"
+              : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
           }`}
         >
           Monthly
         </button>
       </div>
 
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">
+      {/* 📈 Chart Card */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100 mb-3 sm:mb-4">
           {chartView === "weekly" ? "Weekly Activity" : "Monthly Activity"}
         </h3>
 
@@ -141,16 +130,16 @@ const Dashboard = ({
         </div>
       </div>
 
-      {/* Task Cards */}
+      {/* 🗂 Task Cards */}
       <div
         className="
-          grid grid-cols-1 
-          sm:grid-cols-2 
-          lg:grid-cols-3 
+          grid grid-cols-1
+          sm:grid-cols-2
+          lg:grid-cols-3
           gap-4 sm:gap-6
         "
       >
-        {tasks.map((task) => (
+        {tasks.map(task => (
           <TaskCard
             key={task.id}
             task={task}

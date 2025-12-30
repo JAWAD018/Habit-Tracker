@@ -41,6 +41,20 @@ const HabitTrackerApp = () => {
     excludedDays: []
   });
 
+    const [darkMode, setDarkMode] = useState(
+  localStorage.getItem("theme") === "dark"
+);
+
+useEffect(() => {
+  if (darkMode) {
+    document.documentElement.classList.add("dark");
+    localStorage.setItem("theme", "dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
+  }
+}, [darkMode]);
+
   // ---------------- AUTH ----------------
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, user => {
@@ -78,10 +92,12 @@ const HabitTrackerApp = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    setView("dashboard");
-  };
+ const handleLogout = async () => {
+  await signOut(auth);
+  setAutoMarked(false); // 👈 reset
+  setView("dashboard");
+};
+
 
   // ---------------- LOAD TASKS ----------------
 
@@ -349,68 +365,72 @@ const autoMarkMissedDays = async (task) => {
   today.setHours(0, 0, 0, 0);
   const dateKey = today.toISOString().split("T")[0];
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar
-        userEmail={currentUser.email}
-        onLogout={handleLogout}
-      />
+return (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <Navbar
+      userEmail={currentUser.email}
+      onLogout={handleLogout}
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
 
-      <div className="container mx-auto p-6">
-        <div className="flex gap-4 mb-6">
-          <button
-            onClick={() => setView("dashboard")}
-            className={`px-4 py-2 rounded-xl ${
-              view === "dashboard"
-                ? "bg-indigo-600 text-white"
-                : "bg-white border"
-            }`}
-          >
-            Dashboard
-          </button>
-          <button
-            onClick={() => setView("create")}
-            className={`px-4 py-2 rounded-xl ${
-              view === "create"
-                ? "bg-indigo-600 text-white"
-                : "bg-white border"
-            }`}
-          >
-            Create Task
-          </button>
-        </div>
+    <div className="container mx-auto p-6">
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setView("dashboard")}
+          className={`px-4 py-2 rounded-xl transition ${
+            view === "dashboard"
+              ? "bg-indigo-600 text-white"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+          }`}
+        >
+          Dashboard
+        </button>
 
-        {view === "dashboard" && (
-          <Dashboard
-            tasks={tasks}
-            today={today}
-            dateKey={dateKey}
-            calculateStats={calculateStats}
-            handleCheckin={handleCheckin}
-            deleteTask={deleteTask}
-            setSelectedTask={setSelectedTask}
-          />
-        )}
-
-        {view === "create" && (
-          <CreateTask
-            newTask={newTask}
-            setNewTask={setNewTask}
-            calculateActiveDays={calculateActiveDays}
-            createTask={createTask}
-            setView={setView}
-          />
-        )}
-
-        {selectedTask && (
-          <CalendarModal
-            task={selectedTask}
-            onClose={() => setSelectedTask(null)}
-          />
-        )}
+        <button
+          onClick={() => setView("create")}
+          className={`px-4 py-2 rounded-xl transition ${
+            view === "create"
+              ? "bg-indigo-600 text-white"
+              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+          }`}
+        >
+          Create Task
+        </button>
       </div>
+
+      {view === "dashboard" && (
+        <Dashboard
+          tasks={tasks}
+          today={today}
+          dateKey={dateKey}
+          calculateStats={calculateStats}
+          handleCheckin={handleCheckin}
+          deleteTask={deleteTask}
+          setSelectedTask={setSelectedTask}
+        />
+      )}
+
+      {view === "create" && (
+        <CreateTask
+          newTask={newTask}
+          setNewTask={setNewTask}
+          calculateActiveDays={calculateActiveDays}
+          createTask={createTask}
+          setView={setView}
+        />
+      )}
+
+      {selectedTask && (
+        <CalendarModal
+          task={selectedTask}
+          onClose={() => setSelectedTask(null)}
+        />
+      )}
     </div>
-  );
+  </div>
+);
+
 };
 
 export default HabitTrackerApp;
