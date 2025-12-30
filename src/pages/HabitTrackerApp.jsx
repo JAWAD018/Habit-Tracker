@@ -33,6 +33,7 @@ const HabitTrackerApp = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const [view, setView] = useState("dashboard");
   const [selectedTask, setSelectedTask] = useState(null);
+  const [autoMarked, setAutoMarked] = useState(false);
 
   const [newTask, setNewTask] = useState({
     name: "",
@@ -83,29 +84,6 @@ const HabitTrackerApp = () => {
   };
 
   // ---------------- LOAD TASKS ----------------
- useEffect(() => {
-  if (!currentUser) return;
-
-  const loadAndAutoMark = async () => {
-    const snap = await getDocs(
-      collection(db, "users", currentUser.uid, "tasks")
-    );
-
-    const loadedTasks = snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }));
-
-    setTasks(loadedTasks);
-
-    // 🔥 Auto-mark missed days (runs once on app open)
-    for (const task of loadedTasks) {
-      await autoMarkMissedDays(task);
-    }
-  };
-
-  loadAndAutoMark();
-}, [currentUser]);
 
 
   // ---------------- HELPERS ----------------
@@ -262,32 +240,83 @@ const autoMarkMissedDays = async (task) => {
   today.setHours(0, 0, 0, 0);
 
   const updates = {};
+  const now = serverTimestamp();
+  const habitStartKey = task.startDate.split("T")[0];
 
-  for (let d = new Date(startDate); d < today; d.setDate(d.getDate() + 1))
- {
+  for (let d = new Date(startDate); d < today; d.setDate(d.getDate() + 1)) {
     const dateKey = d.toISOString().split("T")[0];
 
-    // Skip excluded days
+    // ❌ never mark start day
+    if (dateKey === habitStartKey) continue;
+
+    // ❌ skip excluded days
     if (!isActiveDay(d, task.excludedDays)) continue;
 
-    // Skip days already checked
+    // ❌ skip days already checked in (YES or NO)
     if (task.checkins?.[dateKey]) continue;
 
     updates[`checkins.${dateKey}`] = {
       completed: false,
       autoMarked: true,
-      timestamp: serverTimestamp()
+      timestamp: now
     };
   }
 
-  if (Object.keys(updates).length === 0) return;
+  if (!Object.keys(updates).length) return;
 
   await updateDoc(
     doc(db, "users", currentUser.uid, "tasks", task.id),
     updates
   );
+
+  // ✅ merge locally (UI only)
+  setTasks(prev =>
+    prev.map(t =>
+      t.id === task.id
+        ? {
+            ...t,
+            checkins: {
+              ...(t.checkins || {}),
+              ...Object.fromEntries(
+                Object.keys(updates).map(k => {
+                  const dk = k.replace("checkins.", "");
+                  return [
+                    dk,
+                    { completed: false, autoMarked: true, timestamp: new Date() }
+                  ];
+                })
+              )
+            }
+          }
+        : t
+    )
+  );
 };
 
+ useEffect(() => {
+  if (!currentUser || autoMarked) return;
+
+  const loadAndAutoMark = async () => {
+    const snap = await getDocs(
+      collection(db, "users", currentUser.uid, "tasks")
+    );
+
+    const loadedTasks = snap.docs.map(d => ({
+      id: d.id,
+      ...d.data()
+    }));
+
+    setTasks(loadedTasks);
+
+    for (const task of loadedTasks) {
+      await autoMarkMissedDays(task);
+    }
+
+    setAutoMarked(true);
+  };
+
+  loadAndAutoMark();
+}, [currentUser, autoMarked]);
 
 
 
