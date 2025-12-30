@@ -285,8 +285,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-14 px-6">
+     <footer className="bg-gray-900 text-gray-400 py-14 px-6">
   <div className="container mx-auto max-w-6xl">
 
     <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -311,31 +310,79 @@ const Home = () => {
       <div>
         <h4 className="text-white font-semibold mb-4">Product</h4>
         <ul className="space-y-2 text-sm">
-          <li>Habit Tracking</li>
-          <li>Streaks</li>
-          <li>Calendar View</li>
-          <li>Progress Analytics</li>
+          <li><Link to="/how-it-works" className="hover:text-white">How it Works</Link></li>
+          <li><Link to="/about" className="hover:text-white">About</Link></li>
+          <li><Link to="/faq" className="hover:text-white">FAQs</Link></li>
+          <li><Link to="/support" className="hover:text-white">Support</Link></li>
         </ul>
       </div>
 
-      {/* Resources */}
+      {/* Blog */}
       <div>
-        <h4 className="text-white font-semibold mb-4">Resources</h4>
+        <h4 className="text-white font-semibold mb-4">Blog</h4>
         <ul className="space-y-2 text-sm">
-  <li><Link to="/how-it-works">How it Works</Link></li>
-  <li><Link to="/demo">Product Demo</Link></li>
-  <li><Link to="/faq">FAQs</Link></li>
-  <li><Link to="/support">Support</Link></li>
-</ul>
+          <li>
+            <Link
+              to="/blog/how-to-build-daily-habits"
+              className="hover:text-white"
+            >
+              How to Build Daily Habits
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/blog/best-habit-tracking-methods"
+              className="hover:text-white"
+            >
+              Best Habit Tracking Methods
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/blog/habit-tracking-productivity"
+              className="hover:text-white"
+            >
+              Habit Tracking & Productivity
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/blog/daily-productivity-tips"
+              className="hover:text-white"
+            >
+              Daily Productivity Tips
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/blog/habit-building-mistakes"
+              className="hover:text-white"
+            >
+              Habit Building Mistakes
+            </Link>
+          </li>
+        </ul>
       </div>
 
       {/* Legal */}
       <div>
         <h4 className="text-white font-semibold mb-4">Legal</h4>
         <ul className="space-y-2 text-sm">
-          <li><Link to='/privacy-policy'>Privacy Policy</Link></li>
-          <li><Link to='/terms'>Terms of Service</Link></li>
-          <li><Link to='/terms'>Cookie Policy</Link></li>
+          <li>
+            <Link to="/privacy-policy" className="hover:text-white">
+              Privacy Policy
+            </Link>
+          </li>
+          <li>
+            <Link to="/terms" className="hover:text-white">
+              Terms of Service
+            </Link>
+          </li>
+          <li>
+            <Link to="/terms" className="hover:text-white">
+              Cookie Policy
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
