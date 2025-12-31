@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "firebase/auth";
 import {
   collection,
@@ -13,9 +13,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
-  serverTimestamp 
+  serverTimestamp,
 } from "firebase/firestore";
-
 
 import { auth, db, googleProvider } from "../firebase";
 
@@ -33,7 +32,6 @@ const getLocalDateKey = (date) => {
   return `${y}-${m}-${d}`;
 };
 
-
 const HabitTrackerApp = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -42,30 +40,31 @@ const HabitTrackerApp = () => {
   const [view, setView] = useState("dashboard");
   const [selectedTask, setSelectedTask] = useState(null);
   const [autoMarked, setAutoMarked] = useState(false);
+  const [loadingTasks, setLoadingTasks] = useState(true);
 
   const [newTask, setNewTask] = useState({
     name: "",
     duration: 30,
-    excludedDays: []
+    excludedDays: [],
   });
 
-    const [darkMode, setDarkMode] = useState(
-  localStorage.getItem("theme") === "dark"
-);
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark"
+  );
 
-useEffect(() => {
-  if (darkMode) {
-    document.documentElement.classList.add("dark");
-    localStorage.setItem("theme", "dark");
-  } else {
-    document.documentElement.classList.remove("dark");
-    localStorage.setItem("theme", "light");
-  }
-}, [darkMode]);
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  }, [darkMode]);
 
   // ---------------- AUTH ----------------
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, user => {
+    const unsub = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
     });
     return () => unsub();
@@ -100,20 +99,26 @@ useEffect(() => {
     }
   };
 
- const handleLogout = async () => {
-  await signOut(auth);
-  setAutoMarked(false); // 👈 reset
-  setView("dashboard");
-};
-
+  const handleLogout = async () => {
+    await signOut(auth);
+    setAutoMarked(false); // 👈 reset
+    setView("dashboard");
+  };
 
   // ---------------- LOAD TASKS ----------------
-
 
   // ---------------- HELPERS ----------------
   const calculateActiveDays = (start, duration, excluded) => {
     let count = 0;
-    const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
     for (let i = 0; i < duration; i++) {
       const d = new Date(start);
       d.setDate(d.getDate() + i);
@@ -122,68 +127,76 @@ useEffect(() => {
     return count;
   };
 
-const calculateStats = (task, today) => {
-  const checkins = task.checkins || {};
-  const excludedDays = task.excludedDays ?? [];
+  const calculateStats = (task, today) => {
+    const checkins = task.checkins || {};
+    const excludedDays = task.excludedDays ?? [];
 
-  const completed = Object.values(checkins).filter(c => c.completed).length;
-  const missed = Object.values(checkins).filter(c => !c.completed).length;
+    const completed = Object.values(checkins).filter((c) => c.completed).length;
+    const missed = Object.values(checkins).filter((c) => !c.completed).length;
 
-  const percentage = task.totalActiveDays
-    ? Math.round((completed / task.totalActiveDays) * 100)
-    : 0;
+    const percentage = task.totalActiveDays
+      ? Math.round((completed / task.totalActiveDays) * 100)
+      : 0;
 
-  // 🔥 FIXED CURRENT STREAK
-  let currentStreak = 0;
+    // 🔥 FIXED CURRENT STREAK
+    let currentStreak = 0;
 
-  const dayNames = [
-    "Sunday","Monday","Tuesday",
-    "Wednesday","Thursday","Friday","Saturday"
-  ];
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
 
-  // normalize today
-  const cursor = new Date(today);
-  cursor.setHours(0, 0, 0, 0);
+    // normalize today
+    const cursor = new Date(today);
+    cursor.setHours(0, 0, 0, 0);
 
-  const startDateKey = task.startDate.split("T")[0];
+    const startDateKey = task.startDate.split("T")[0];
 
-  while (true) {
-    const dateKey = getLocalDateKey(cursor);
+    while (true) {
+      const dateKey = getLocalDateKey(cursor);
 
-    // stop before habit start
-    if (dateKey < startDateKey) break;
+      // stop before habit start
+      if (dateKey < startDateKey) break;
 
-    const dayName = dayNames[cursor.getDay()];
+      const dayName = dayNames[cursor.getDay()];
 
-    // skip excluded days
-    if (excludedDays.includes(dayName)) {
+      // skip excluded days
+      if (excludedDays.includes(dayName)) {
+        cursor.setDate(cursor.getDate() - 1);
+        continue;
+      }
+
+      const checkin = checkins[dateKey];
+
+      // ❌ break streak
+      if (!checkin || checkin.completed === false) break;
+
+      // ✅ completed
+      currentStreak++;
+
       cursor.setDate(cursor.getDate() - 1);
-      continue;
     }
 
-    const checkin = checkins[dateKey];
+    return { completed, missed, percentage, currentStreak };
+  };
 
-    // ❌ break streak
-    if (!checkin || checkin.completed === false) break;
-
-    // ✅ completed
-    currentStreak++;
-
-    cursor.setDate(cursor.getDate() - 1);
-  }
-
-  return { completed, missed, percentage, currentStreak };
-};
-
-
-const isActiveDay = (date, excludedDays) => {
-  const days = [
-    "Sunday","Monday","Tuesday",
-    "Wednesday","Thursday","Friday","Saturday"
-  ];
-  return !excludedDays.includes(days[date.getDay()]);
-};
-
+  const isActiveDay = (date, excludedDays) => {
+    const days = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ];
+    return !excludedDays.includes(days[date.getDay()]);
+  };
 
   // ---------------- TASK ACTIONS ----------------
   const createTask = async () => {
@@ -192,22 +205,19 @@ const isActiveDay = (date, excludedDays) => {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
-    await addDoc(
-      collection(db, "users", currentUser.uid, "tasks"),
-      {
-        name: newTask.name,
-        startDate: start.toISOString(),
-        duration: newTask.duration,
-        excludedDays: newTask.excludedDays,
-        totalActiveDays: calculateActiveDays(
-          start,
-          newTask.duration,
-          newTask.excludedDays
-        ),
-        checkins: {},
-        createdAt: new Date().toISOString()
-      }
-    );
+    await addDoc(collection(db, "users", currentUser.uid, "tasks"), {
+      name: newTask.name,
+      startDate: start.toISOString(),
+      duration: newTask.duration,
+      excludedDays: newTask.excludedDays,
+      totalActiveDays: calculateActiveDays(
+        start,
+        newTask.duration,
+        newTask.excludedDays
+      ),
+      checkins: {},
+      createdAt: new Date().toISOString(),
+    });
 
     setNewTask({ name: "", duration: 30, excludedDays: [] });
     setView("dashboard");
@@ -215,144 +225,142 @@ const isActiveDay = (date, excludedDays) => {
     const snap = await getDocs(
       collection(db, "users", currentUser.uid, "tasks")
     );
-    setTasks(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    setTasks(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
   };
 
-const handleCheckin = async (taskId, completed, dateKey) => {
-  // 🔥 Optimistic UI update (no extra DB reads)
-  setTasks(prev =>
-    prev.map(t =>
-      t.id === taskId
-        ? {
-            ...t,
-            checkins: {
-              ...(t.checkins || {}),
-              [dateKey]: {
-                completed,
-                autoMarked: false,
-                timestamp: new Date()
-              }
+  const handleCheckin = async (taskId, completed, dateKey) => {
+    // 🔥 Optimistic UI update (no extra DB reads)
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === taskId
+          ? {
+              ...t,
+              checkins: {
+                ...(t.checkins || {}),
+                [dateKey]: {
+                  completed,
+                  autoMarked: false,
+                  timestamp: new Date(),
+                },
+              },
             }
-          }
-        : t
-    )
-  );
+          : t
+      )
+    );
 
-  try {
-    // 🔐 Single DB write for the day (no repeat calls)
-    await updateDoc(
-      doc(db, "users", currentUser.uid, "tasks", taskId),
-      {
+    try {
+      // 🔐 Single DB write for the day (no repeat calls)
+      await updateDoc(doc(db, "users", currentUser.uid, "tasks", taskId), {
         [`checkins.${dateKey}`]: {
           completed,
           autoMarked: false,
-          timestamp: serverTimestamp()
-        }
-      }
-    );
-  } catch (error) {
-    console.error("Check-in failed:", error);
-    alert("Something went wrong. Please try again.");
-  }
-};
-
-const autoMarkMissedDays = async (task) => {
-  const startDate = new Date(task.startDate);
-  startDate.setHours(0, 0, 0, 0);
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const updates = {};
-  const now = serverTimestamp();
-  const habitStartKey = getLocalDateKey(new Date(task.startDate));
-
-  for (let d = new Date(startDate); d < today; d.setDate(d.getDate() + 1)) {
-    const dateKey = getLocalDateKey(d); // ✅ d is valid HERE
-
-    // ⛔ never mark habit start day
-    if (dateKey === habitStartKey) continue;
-
-    // ⛔ skip excluded days
-    if (!isActiveDay(d, task.excludedDays)) continue;
-
-    // ⛔ skip days already checked in
-    if (task.checkins?.[dateKey]) continue;
-
-    updates[`checkins.${dateKey}`] = {
-      completed: false,
-      autoMarked: true,
-      timestamp: now
-    };
-  }
-
-  if (!Object.keys(updates).length) return;
-
-  await updateDoc(
-    doc(db, "users", currentUser.uid, "tasks", task.id),
-    updates
-  );
-
-  // 🔄 sync local state
-  setTasks(prev =>
-    prev.map(t =>
-      t.id === task.id
-        ? {
-            ...t,
-            checkins: {
-              ...(t.checkins || {}),
-              ...Object.fromEntries(
-                Object.keys(updates).map(k => {
-                  const dk = k.replace("checkins.", "");
-                  return [
-                    dk,
-                    { completed: false, autoMarked: true, timestamp: new Date() }
-                  ];
-                })
-              )
-            }
-          }
-        : t
-    )
-  );
-};
-
-
-useEffect(() => {
-  if (!currentUser || autoMarked) return;
-
-  const loadAndAutoMark = async () => {
-    const snap = await getDocs(
-      collection(db, "users", currentUser.uid, "tasks")
-    );
-
-    const loadedTasks = snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }));
-
-    setTasks(loadedTasks);
-
-    for (const task of loadedTasks) {
-      await autoMarkMissedDays(task);
+          timestamp: serverTimestamp(),
+        },
+      });
+    } catch (error) {
+      console.error("Check-in failed:", error);
+      alert("Something went wrong. Please try again.");
     }
-
-    setAutoMarked(true);
   };
 
-  loadAndAutoMark();
-}, [currentUser, autoMarked]);
+  const autoMarkMissedDays = async (task) => {
+    const startDate = new Date(task.startDate);
+    startDate.setHours(0, 0, 0, 0);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
+    const updates = {};
+    const now = serverTimestamp();
+    const habitStartKey = getLocalDateKey(new Date(task.startDate));
 
+    for (let d = new Date(startDate); d < today; d.setDate(d.getDate() + 1)) {
+      const dateKey = getLocalDateKey(d); // ✅ d is valid HERE
 
+      // ⛔ never mark habit start day
+      if (dateKey === habitStartKey) continue;
+
+      // ⛔ skip excluded days
+      if (!isActiveDay(d, task.excludedDays)) continue;
+
+      // ⛔ skip days already checked in
+      if (task.checkins?.[dateKey]) continue;
+
+      updates[`checkins.${dateKey}`] = {
+        completed: false,
+        autoMarked: true,
+        timestamp: now,
+      };
+    }
+
+    if (!Object.keys(updates).length) return;
+
+    await updateDoc(
+      doc(db, "users", currentUser.uid, "tasks", task.id),
+      updates
+    );
+
+    // 🔄 sync local state
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === task.id
+          ? {
+              ...t,
+              checkins: {
+                ...(t.checkins || {}),
+                ...Object.fromEntries(
+                  Object.keys(updates).map((k) => {
+                    const dk = k.replace("checkins.", "");
+                    return [
+                      dk,
+                      {
+                        completed: false,
+                        autoMarked: true,
+                        timestamp: new Date(),
+                      },
+                    ];
+                  })
+                ),
+              },
+            }
+          : t
+      )
+    );
+  };
+
+  useEffect(() => {
+    if (!currentUser || autoMarked) return;
+
+    const loadAndAutoMark = async () => {
+      setLoadingTasks(true); // ⏳ start loading
+
+      const snap = await getDocs(
+        collection(db, "users", currentUser.uid, "tasks")
+      );
+
+      const loadedTasks = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+      }));
+
+      setTasks(loadedTasks);
+
+      // auto-mark missed days
+      for (const task of loadedTasks) {
+        await autoMarkMissedDays(task);
+      }
+
+      setAutoMarked(true);
+      setLoadingTasks(false); // ✅ loading finished
+    };
+
+    loadAndAutoMark();
+  }, [currentUser, autoMarked]);
 
   const deleteTask = async (taskId) => {
     if (!confirm("Delete task?")) return;
-    await deleteDoc(
-      doc(db, "users", currentUser.uid, "tasks", taskId)
-    );
-    setTasks(tasks.filter(t => t.id !== taskId));
+    await deleteDoc(doc(db, "users", currentUser.uid, "tasks", taskId));
+    setTasks(tasks.filter((t) => t.id !== taskId));
   };
 
   // ---------------- LOGIN ----------------
@@ -374,72 +382,72 @@ useEffect(() => {
   today.setHours(0, 0, 0, 0);
   const dateKey = today.toISOString().split("T")[0];
 
-return (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
-    <Navbar
-      userEmail={currentUser.email}
-      onLogout={handleLogout}
-      darkMode={darkMode}
-      setDarkMode={setDarkMode}
-    />
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+      <Navbar
+        userEmail={currentUser.email}
+        onLogout={handleLogout}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+      />
 
-    <div className="container mx-auto p-6">
-      <div className="flex gap-4 mb-6">
-        <button
-          onClick={() => setView("dashboard")}
-          className={`px-4 py-2 rounded-xl transition ${
-            view === "dashboard"
-              ? "bg-indigo-600 text-white"
-              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-          }`}
-        >
-          Dashboard
-        </button>
+      <div className="container mx-auto p-6">
+        <div className="flex gap-4 mb-6">
+          <button
+            onClick={() => setView("dashboard")}
+            className={`px-4 py-2 rounded-xl transition ${
+              view === "dashboard"
+                ? "bg-indigo-600 text-white"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+            }`}
+          >
+            Dashboard
+          </button>
 
-        <button
-          onClick={() => setView("create")}
-          className={`px-4 py-2 rounded-xl transition ${
-            view === "create"
-              ? "bg-indigo-600 text-white"
-              : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
-          }`}
-        >
-          Create Task
-        </button>
+          <button
+            onClick={() => setView("create")}
+            className={`px-4 py-2 rounded-xl transition ${
+              view === "create"
+                ? "bg-indigo-600 text-white"
+                : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700"
+            }`}
+          >
+            Create Task
+          </button>
+        </div>
+
+        {view === "dashboard" && (
+          <Dashboard
+            tasks={tasks}
+            loading={loadingTasks} // ✅ THIS WAS MISSING
+            today={today}
+            dateKey={dateKey}
+            calculateStats={calculateStats}
+            handleCheckin={handleCheckin}
+            deleteTask={deleteTask}
+            setSelectedTask={setSelectedTask}
+          />
+        )}
+
+        {view === "create" && (
+          <CreateTask
+            newTask={newTask}
+            setNewTask={setNewTask}
+            calculateActiveDays={calculateActiveDays}
+            createTask={createTask}
+            setView={setView}
+          />
+        )}
+
+        {selectedTask && (
+          <CalendarModal
+            task={selectedTask}
+            onClose={() => setSelectedTask(null)}
+          />
+        )}
       </div>
-
-      {view === "dashboard" && (
-        <Dashboard
-          tasks={tasks}
-          today={today}
-          dateKey={dateKey}
-          calculateStats={calculateStats}
-          handleCheckin={handleCheckin}
-          deleteTask={deleteTask}
-          setSelectedTask={setSelectedTask}
-        />
-      )}
-
-      {view === "create" && (
-        <CreateTask
-          newTask={newTask}
-          setNewTask={setNewTask}
-          calculateActiveDays={calculateActiveDays}
-          createTask={createTask}
-          setView={setView}
-        />
-      )}
-
-      {selectedTask && (
-        <CalendarModal
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-        />
-      )}
     </div>
-  </div>
-);
-
+  );
 };
 
 export default HabitTrackerApp;

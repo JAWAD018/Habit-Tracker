@@ -81,6 +81,7 @@ const getMonthlyProgressFromFirebase = (tasks = []) => {
 /* ---------------- DASHBOARD ---------------- */
 const Dashboard = ({
   tasks,
+  loading,  
   dateKey,
   today,
   calculateStats,
@@ -89,6 +90,30 @@ const Dashboard = ({
   setSelectedTask,
 }) => {
   const [chartView, setChartView] = useState("weekly");
+  
+//  LOADING STATE
+if (loading) {
+  return (
+    <div className="py-20 space-y-4 animate-pulse">
+      <div className="h-6 bg-gray-200 dark:bg-gray-800 rounded w-1/3 mx-auto" />
+      <div className="h-4 bg-gray-200 dark:bg-gray-800 rounded w-1/2 mx-auto" />
+    </div>
+  );
+}
+
+//  EMPTY STATE (NO TASKS)
+if (!tasks || tasks.length === 0) {
+  return (
+    <div className="py-20 text-center">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+        No habits yet
+      </h3>
+      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+        Create your first habit to start tracking your progress.
+      </p>
+    </div>
+  );
+}
 
 
   const chartData =

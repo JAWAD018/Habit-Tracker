@@ -18,34 +18,36 @@ const WeeklyProgressChart = ({ data }) => {
   );
 
   // ✅ EMPTY STATE (RESPONSIVE)
-  if (!hasActivity) {
-    return (
-      <div className="
+ if (!hasActivity) {
+  return (
+    <div
+      className="
         h-40 sm:h-48 lg:h-64
         flex flex-col items-center justify-center
-      ">
-        {/* Placeholder bars */}
-        <div className="flex items-end gap-3 mb-5">
-          {Array.from({ length: 7 }).map((_, i) => (
-            <div
-              key={i}
-              className="
-                w-6 sm:w-7 lg:w-9
-                h-24 sm:h-32 lg:h-44
-                rounded-md
-                bg-gray-200 dark:bg-gray-800
-                animate-pulse
-              "
-            />
-          ))}
-        </div>
-
-        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 text-center">
-          Start checking in to see your weekly progress
-        </p>
+      "
+    >
+      {/* Placeholder bars (STATIC, NOT LOADING) */}
+      <div className="flex items-end gap-3 mb-5 opacity-40">
+        {Array.from({ length: 7 }).map((_, i) => (
+          <div
+            key={i}
+            className="
+              w-6 sm:w-7 lg:w-9
+              h-24 sm:h-32 lg:h-44
+              rounded-md
+              bg-gray-300 dark:bg-gray-700
+            "
+          />
+        ))}
       </div>
-    );
-  }
+
+      <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400 text-center">
+        Start checking in to see your weekly progress
+      </p>
+    </div>
+  );
+}
+
 
   // ✅ NORMAL CHART (RESPONSIVE)
   return (
@@ -69,7 +71,7 @@ const WeeklyProgressChart = ({ data }) => {
         barGap={10}
         barCategoryGap="20%"
       >
-        <CartesianGrid vertical={false} strokeOpacity={0.15} />
+        <CartesianGrid vertical={false} strokeOpacity={0.08} />
         <XAxis dataKey="day" />
         <YAxis allowDecimals={false} />
         <ChartTooltip content={<ChartTooltipContent />} />
@@ -80,6 +82,9 @@ const WeeklyProgressChart = ({ data }) => {
           stackId="a"
           radius={[8, 8, 0, 0]}
           fill="var(--color-completed)"
+          isAnimationActive={true}
+          animationDuration={600}
+
         />
 
         {/* ✅ MISSED */}
@@ -88,6 +93,8 @@ const WeeklyProgressChart = ({ data }) => {
           stackId="a"
           radius={[8, 8, 8, 8]}
           fill="var(--color-missed)"
+          isAnimationActive={true}
+          animationDuration={600}
         />
       </BarChart>
     </ChartContainer>
