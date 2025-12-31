@@ -26,6 +26,14 @@ import Dashboard from "../components/dashboard/Dashboard";
 import CreateTask from "../components/tasks/CreateTask";
 import CalendarModal from "../components/calendar/CalendarModal";
 
+const getLocalDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+
 const HabitTrackerApp = () => {
   const [currentUser, setCurrentUser] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -140,7 +148,7 @@ const calculateStats = (task, today) => {
   const startDateKey = task.startDate.split("T")[0];
 
   while (true) {
-    const dateKey = cursor.toISOString().split("T")[0];
+    const dateKey = getLocalDateKey(cursor);
 
     // stop before habit start
     if (dateKey < startDateKey) break;
@@ -257,18 +265,18 @@ const autoMarkMissedDays = async (task) => {
 
   const updates = {};
   const now = serverTimestamp();
-  const habitStartKey = task.startDate.split("T")[0];
+  const habitStartKey = getLocalDateKey(new Date(task.startDate));
 
   for (let d = new Date(startDate); d < today; d.setDate(d.getDate() + 1)) {
-    const dateKey = d.toISOString().split("T")[0];
+    const dateKey = getLocalDateKey(d); // ✅ d is valid HERE
 
-    // ❌ never mark start day
+    // ⛔ never mark habit start day
     if (dateKey === habitStartKey) continue;
 
-    // ❌ skip excluded days
+    // ⛔ skip excluded days
     if (!isActiveDay(d, task.excludedDays)) continue;
 
-    // ❌ skip days already checked in (YES or NO)
+    // ⛔ skip days already checked in
     if (task.checkins?.[dateKey]) continue;
 
     updates[`checkins.${dateKey}`] = {
@@ -285,7 +293,7 @@ const autoMarkMissedDays = async (task) => {
     updates
   );
 
-  // ✅ merge locally (UI only)
+  // 🔄 sync local state
   setTasks(prev =>
     prev.map(t =>
       t.id === task.id
@@ -309,7 +317,8 @@ const autoMarkMissedDays = async (task) => {
   );
 };
 
- useEffect(() => {
+
+useEffect(() => {
   if (!currentUser || autoMarked) return;
 
   const loadAndAutoMark = async () => {

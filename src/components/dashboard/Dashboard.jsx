@@ -3,7 +3,14 @@ import TaskCard from "./TaskCard";
 import WeeklyProgressChart from "../charts/WeeklyProgressChart";
 import { useState } from "react";
 
-/* ---------------- WEEKLY DATA ---------------- */
+
+const getLocalDateKey = (date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
 const getWeeklyProgressFromFirebase = (tasks = []) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -14,7 +21,7 @@ const getWeeklyProgressFromFirebase = (tasks = []) => {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
 
-    const dateKey = date.toISOString().split("T")[0];
+    const dateKey = getLocalDateKey(date);
     const dayLabel = date.toLocaleDateString("en-US", { weekday: "short" });
 
     let completed = 0;
@@ -33,7 +40,6 @@ const getWeeklyProgressFromFirebase = (tasks = []) => {
 
   return result;
 };
-
 /* ---------------- MONTHLY DATA ---------------- */
 const getMonthlyProgressFromFirebase = (tasks = []) => {
   const today = new Date();
@@ -49,7 +55,7 @@ const getMonthlyProgressFromFirebase = (tasks = []) => {
     const date = new Date(year, month, day);
     date.setHours(0, 0, 0, 0);
 
-    const dateKey = date.toISOString().split("T")[0];
+    const dateKey = getLocalDateKey(date);
 
     let completed = 0;
     let incompleted = 0;
@@ -80,9 +86,10 @@ const Dashboard = ({
   calculateStats,
   handleCheckin,
   deleteTask,
-  setSelectedTask
+  setSelectedTask,
 }) => {
   const [chartView, setChartView] = useState("weekly");
+
 
   const chartData =
     chartView === "weekly"
