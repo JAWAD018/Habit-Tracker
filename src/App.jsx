@@ -12,6 +12,7 @@ import BestHabitTrackingMethods from "./components/blog/BestHabitTrackingMethods
 import HabitTrackingProductivity from "./components/blog/HabitTrackingProductivity";
 import DailyProductivityTips from "./components/blog/DailyProductivityTips";
 import HabitBuildingMistakes from "./components/blog/HabitBuildingMistakes";
+import AboutUs from "./pages/AboutUs";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/support" element={<Support />} />
+        <Route path="/about" element={<AboutUs />} />
 
         {/* Blogs Routes */}
 
